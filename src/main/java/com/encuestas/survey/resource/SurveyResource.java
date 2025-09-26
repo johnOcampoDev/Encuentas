@@ -1,6 +1,5 @@
 package com.encuestas.survey.resource;
 
-import com.encuestas.common.util.ResponseUtil;
 import com.encuestas.survey.entity.Survey;
 import com.encuestas.survey.service.SurveyService;
 
@@ -23,35 +22,42 @@ import jakarta.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public class SurveyResource {
 
-	@Inject
-	SurveyService surveyService;
+    @Inject
+    SurveyService surveyService;
 
-	@GET
-	public Multi<Survey> listAll() {
-		return surveyService.listAll();
-	}
+    @GET
+    public Multi<Survey> listAll() {
+        return surveyService.listAll();
+    }
 
-	@GET
-	@Path("/{id}")
-	public Uni<Response> getById(@PathParam("id") Long id) {
-		return ResponseUtil.okOrNotFound(surveyService.findById(id));
-	}
+    @GET
+    @Path("/{id}")
+    public Uni<Response> getById(@PathParam("id") Long id) {
+        return surveyService.findById(id)
+                .onItem().ifNotNull().transform(s -> Response.ok(s).build())
+                .onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND)::build);
+    }
 
-	@POST
-	public Uni<Response> create(Survey survey) {
-		return ResponseUtil.created(surveyService.create(survey));
-	}
+    @POST
+    public Uni<Response> create(Survey survey) {
+        return surveyService.create(survey)
+                .onItem().transform(s -> Response.status(Response.Status.CREATED).entity(s).build());
+    }
 
-	@PUT
-	@Path("/{id}")
-	public Uni<Response> update(@PathParam("id") Long id, Survey survey) {
-		return ResponseUtil.okOrNotFound(surveyService.update(id, survey));
-	}
+    @PUT
+    @Path("/{id}")
+    public Uni<Response> update(@PathParam("id") Long id, Survey survey) {
+        return surveyService.update(id, survey)
+                .onItem().ifNotNull().transform(s -> Response.ok(s).build())
+                .onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND)::build);
+    }
 
-	@DELETE
-	@Path("/{id}")
-	public Uni<Response> delete(@PathParam("id") Long id) {
-		return surveyService.delete(id).onItem().transform(
-				deleted -> deleted ? Response.noContent().build() : Response.status(Response.Status.NOT_FOUND).build());
-	}
+    @DELETE
+    @Path("/{id}")
+    public Uni<Response> delete(@PathParam("id") Long id) {
+        return surveyService.delete(id)
+                .onItem().transform(deleted -> deleted
+                        ? Response.noContent().build()
+                        : Response.status(Response.Status.NOT_FOUND).build());
+    }
 }

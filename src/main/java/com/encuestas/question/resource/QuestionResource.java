@@ -1,6 +1,5 @@
 package com.encuestas.question.resource;
 
-import com.encuestas.common.util.ResponseUtil;
 import com.encuestas.question.entity.Question;
 import com.encuestas.question.service.QuestionService;
 
@@ -15,6 +14,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -34,18 +34,21 @@ public class QuestionResource {
 	@GET
 	@Path("/{id}")
 	public Uni<Response> getById(@PathParam("id") Long id) {
-		return ResponseUtil.okOrNotFound(questionService.findById(id));
+		return questionService.findById(id).onItem().ifNotNull().transform(q -> Response.ok(q).build()).onItem()
+				.ifNull().continueWith(Response.status(Response.Status.NOT_FOUND)::build);
 	}
 
 	@POST
-	public Uni<Response> create(Question question) {
-		return ResponseUtil.created(questionService.create(question));
+	public Uni<Response> create(Question question, @QueryParam("surveyId") Long surveyId) {
+		return questionService.create(question, surveyId).onItem()
+				.transform(q -> Response.status(Response.Status.CREATED).entity(q).build());
 	}
 
 	@PUT
 	@Path("/{id}")
 	public Uni<Response> update(@PathParam("id") Long id, Question question) {
-		return ResponseUtil.okOrNotFound(questionService.update(id, question));
+		return questionService.update(id, question).onItem().ifNotNull().transform(q -> Response.ok(q).build()).onItem()
+				.ifNull().continueWith(Response.status(Response.Status.NOT_FOUND)::build);
 	}
 
 	@DELETE

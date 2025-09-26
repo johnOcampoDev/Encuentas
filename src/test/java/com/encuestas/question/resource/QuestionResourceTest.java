@@ -19,7 +19,10 @@ public class QuestionResourceTest {
 		survey.title = "Encuesta para preguntas";
 		survey.description = "Encuesta base";
 
-		return given().contentType(ContentType.JSON).body(survey).when().post("/surveys").then().extract().path("id");
+		Integer idInt = given().contentType(ContentType.JSON).body(survey).when().post("/surveys").then().extract()
+				.path("id");
+
+		return idInt.longValue();
 	}
 
 	@Test
@@ -30,12 +33,8 @@ public class QuestionResourceTest {
 		question.text = "¿Cómo calificas el servicio?";
 		question.type = "text";
 
-		// Vinculamos surveyId manualmente
-		given().contentType(ContentType.JSON).body(question).queryParam("surveyId", surveyId) // si decides manejar
-																								// surveyId por query
-																								// param
-				.when().post("/questions").then().statusCode(201).body("id", notNullValue())
-				.body("text", is("¿Cómo calificas el servicio?"));
+		given().contentType(ContentType.JSON).body(question).queryParam("surveyId", surveyId).when().post("/questions")
+				.then().statusCode(201).body("id", notNullValue()).body("text", is("¿Cómo calificas el servicio?"));
 	}
 
 	@Test
@@ -46,8 +45,10 @@ public class QuestionResourceTest {
 		question.text = "¿Te gusta el producto?";
 		question.type = "yes-no";
 
-		Long id = given().contentType(ContentType.JSON).body(question).queryParam("surveyId", surveyId).when()
+		Integer idInt = given().contentType(ContentType.JSON).body(question).queryParam("surveyId", surveyId).when()
 				.post("/questions").then().extract().path("id");
+
+		Long id = idInt.longValue();
 
 		given().when().get("/questions/" + id).then().statusCode(200).body("text", is("¿Te gusta el producto?"));
 	}
@@ -65,8 +66,10 @@ public class QuestionResourceTest {
 		question.text = "Pregunta a eliminar";
 		question.type = "text";
 
-		Long id = given().contentType(ContentType.JSON).body(question).queryParam("surveyId", surveyId).when()
+		Integer idInt = given().contentType(ContentType.JSON).body(question).queryParam("surveyId", surveyId).when()
 				.post("/questions").then().extract().path("id");
+
+		Long id = idInt.longValue();
 
 		given().when().delete("/questions/" + id).then().statusCode(204);
 

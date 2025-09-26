@@ -1,13 +1,14 @@
 package com.encuestas.survey.resource;
 
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import org.junit.jupiter.api.Test;
 
 import com.encuestas.survey.entity.Survey;
 
+import org.junit.jupiter.api.Test;
+
 import io.quarkus.test.junit.QuarkusTest;
-import static io.restassured.RestAssured.given;
 import io.restassured.http.ContentType;
 
 @QuarkusTest
@@ -34,8 +35,10 @@ public class SurveyResourceTest {
 		survey.title = "Encuesta de prueba";
 		survey.description = "Testing survey";
 
-		Long id = given().contentType(ContentType.JSON).body(survey).when().post("/surveys").then().extract()
+		Integer idInt = given().contentType(ContentType.JSON).body(survey).when().post("/surveys").then().extract()
 				.path("id");
+
+		Long id = idInt.longValue();
 
 		given().when().get("/surveys/" + id).then().statusCode(200).body("title", is("Encuesta de prueba"));
 	}
@@ -51,8 +54,10 @@ public class SurveyResourceTest {
 		survey.title = "Encuesta a eliminar";
 		survey.description = "Test delete";
 
-		Long id = given().contentType(ContentType.JSON).body(survey).when().post("/surveys").then().extract()
+		Integer idInt = given().contentType(ContentType.JSON).body(survey).when().post("/surveys").then().extract()
 				.path("id");
+
+		Long id = idInt.longValue();
 
 		given().when().delete("/surveys/" + id).then().statusCode(204);
 

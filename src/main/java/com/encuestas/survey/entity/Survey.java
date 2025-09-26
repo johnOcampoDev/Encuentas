@@ -1,32 +1,26 @@
 package com.encuestas.survey.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.encuestas.question.entity.Question;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "surveys")
-public class Survey extends PanacheEntityBase {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Survey extends PanacheEntity {
+	public String title;
+	public String description;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
-
-    @NotBlank
-    public String title;
-
-    public String description;
-
-    @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
-    public List<Question> questions;
+	@OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
+	public List<Question> questions = new ArrayList<>();
 }

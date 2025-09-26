@@ -10,6 +10,7 @@ import com.encuestas.survey.repository.SurveyRepository;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 
 @ApplicationScoped
 public class ResultService {
@@ -18,15 +19,19 @@ public class ResultService {
 	SurveyRepository surveyRepository;
 
 	public Uni<List<QuestionResultDTO>> getResultsBySurvey(Long surveyId) {
-		return Uni.createFrom().item(() -> {
-			Survey survey = surveyRepository.findById(surveyId);
-			if (survey == null)
-				return null;
+	    return Uni.createFrom().item(() -> {
+	        Survey survey = surveyRepository.findById(surveyId);
+	        if (survey == null) {
+	            throw new WebApplicationException("Survey not found", 404); // en vez de null
+	        }
 
-			return survey.questions.stream()
-					.map(q -> new QuestionResultDTO(q.id, q.text,
-							q.answers.stream().map(a -> a.value).collect(Collectors.toList())))
-					.collect(Collectors.toList());
-		});
+	        return survey.questions.stream()
+	                .map(q -> new QuestionResultDTO(
+	                        q.id, 
+	                        q.text,
+	                        q.answers.stream().map(a -> a.value).collect(Collectors.toList())
+	                ))
+	                .collect(Collectors.toList());
+	    });
 	}
 }

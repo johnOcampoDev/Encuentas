@@ -2,12 +2,14 @@ package com.encuestas.answer.service;
 
 import com.encuestas.answer.entity.Answer;
 import com.encuestas.answer.repository.AnswerRepository;
+import com.encuestas.question.entity.Question;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.WebApplicationException;
 
 @ApplicationScoped
 public class AnswerService {
@@ -24,8 +26,13 @@ public class AnswerService {
 	}
 
 	@Transactional
-	public Uni<Answer> create(Answer answer) {
+	public Uni<Answer> create(Answer answer, Long questionId) {
 		return Uni.createFrom().item(() -> {
+			Question question = Question.findById(questionId);
+			if (question == null) {
+				throw new WebApplicationException("Question not found", 404);
+			}
+			answer.question = question; // 🔑 aquí seteamos la relación
 			answerRepository.persist(answer);
 			return answer;
 		});

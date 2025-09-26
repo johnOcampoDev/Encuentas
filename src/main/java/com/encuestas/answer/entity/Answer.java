@@ -2,28 +2,22 @@ package com.encuestas.answer.entity;
 
 import com.encuestas.question.entity.Question;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "answers")
-public class Answer extends PanacheEntityBase {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public Long id;
-
-	@NotBlank
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Answer extends PanacheEntity {
 	public String value;
 
 	@ManyToOne
-	@JoinColumn(name = "question_id")
+	@JoinColumn(name = "question_id", nullable = false)
 	public Question question;
 }
